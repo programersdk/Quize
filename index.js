@@ -1,3 +1,4 @@
+
 const jsQuiz = [
   {
     question: "1. What does 'this' refer to in JavaScript?",
@@ -91,39 +92,90 @@ const jsQuiz = [
     correctAnswer: "To write asynchronous code like synchronous code",
   },
 ];
-let numberQuestion = 0;
-let Run = 0;
-nextQuestion();
+
+let currentQuestionIndex = 0;
+let score = 0;
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  nextQuestion();
+});
+
 
 function nextQuestion() {
-  if (numberQuestion < jsQuiz.length) {
+  if (currentQuestionIndex < jsQuiz.length) {
     let questionElement = document.getElementById("quisten");
     let optionElement = document.getElementById("Option");
-
-    questionElement.innerHTML = jsQuiz[numberQuestion].question;
+    questionElement.innerHTML = jsQuiz[currentQuestionIndex].question;
     optionElement.innerHTML = "";
 
-    for (let i = 0; i < jsQuiz[numberQuestion].options.length; i++) {
-      optionElement.innerHTML += `<li class="list" onclick="chakAnswer(event)"> ${jsQuiz[numberQuestion].options[i]}</li>`;
+    for (let i = 0; i < jsQuiz[currentQuestionIndex].options.length; i++) {
+      optionElement.innerHTML += `<li class="list" onclick="checkAnswer(event)"> ${jsQuiz[currentQuestionIndex].options[i]}</li>`;
     }
   } else {
-    alert("Your Score = " + Run);
+   
+    showResultPopup();
   }
 }
 
-function chakAnswer(event) {
-  let list = document.getElementsByClassName("list");
-  event.target.style.backgroundColor = "rgb(19, 245, 19)";
-  for (let i = 0; i < list.length; i++) {
-    if (event.target !== list[i]) {
-      list[i].style.backgroundColor = "white";
+
+function checkAnswer(event) {
+  let listItems = document.querySelectorAll(".list");
+  const selectedAnswer = event.target.innerText.trim();
+  const correctAnswer = jsQuiz[currentQuestionIndex].correctAnswer.trim();
+
+
+  listItems.forEach((item) => {
+    item.onclick = null;
+  });
+
+ 
+  if (selectedAnswer === correctAnswer) {
+    event.target.style.backgroundColor = "green";
+    score += 10;
+    console.log("Correct! Score:", score);
+  } else {
+    event.target.style.backgroundColor = "red";
+    console.log("Wrong!");
+    
+    for (let item of listItems) {
+      if (item.innerText.trim() === correctAnswer) {
+        item.style.backgroundColor = "green";
+      }
     }
   }
-  if (event.target.innerText === jsQuiz[numberQuestion].correctAnswer) {
-    Run += 10;
-    console.log("Correct! Score:", Run);
-  } else {
-    console.log("Wrong!");
-  }
-  numberQuestion++;
+
+  
+  setTimeout(() => {
+    currentQuestionIndex++;
+    nextQuestion();
+  }, 1000); 
+}
+
+
+function showResultPopup() {
+  const popupContainer = document.getElementById("popup-container");
+  const popupContent = document.querySelector(".popup-content");
+
+  popupContent.innerHTML = `
+    <h2>Quiz Complete!</h2>
+    <p>Your final score is: ${score} out of ${jsQuiz.length * 10}</p>
+    <button onclick="restartQuiz()">Restart Quiz</button>
+  `;
+
+  popupContainer.style.display = "flex";
+}
+
+
+function restartQuiz() {
+  currentQuestionIndex = 0;
+  score = 0;
+  closePopup();
+  nextQuestion();
+}
+
+
+function closePopup() {
+  const popupContainer = document.getElementById("popup-container");
+  popupContainer.style.display = "none";
 }
